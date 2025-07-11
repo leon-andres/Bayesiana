@@ -27,7 +27,8 @@ Se agregó una variable `message_length` que representa la cantidad de caractere
 
 ![Longitud de los mensajes](figure-html/unnamed-chunk-4-1.png)
 
-Es fácil evidenciar que uno de los factores clave al clasificar un mensaje, es su longitud. Mientras que los mensajes ham tienen un sesgo a la derecha, es decir, en su mayoría toman valores bajos. Los mensajes clasificados como spam alteran bastante la distribución con un claro sesgo negativo, es decir, toman valores muy altos para la longitud.
+Es fácil evidenciar que uno de los factores clave al clasificar un mensaje, es su longitud. Mientras que los mensaajes `ham` tienen un sesgo a la derecha, es decir, en su mayoría toman valores bajos. Los mensajes clasificados como `spam` alteran bastante la distribución con un claro sesgo negativo, es decir, toman valores muy altos para la longitud.
+
 ---
 
 ## Modelo de Regresión Logística
@@ -67,9 +68,8 @@ confusionMatrix(data = predicted_labels, reference = test_set$label, positive = 
 Se evaluó el desempeño del modelo en términos de:
 
 - Precisión
-- Sensibilidad (Recall)
+- Sensibilidad
 - Especificidad
-- Accuracy
 
 ### AUC y Curva ROC
 
@@ -77,19 +77,13 @@ Se evaluó el desempeño del modelo en términos de:
 
 La curva comienza en el punto (0,0) y crece rápidamente hacia el vértice superior izquierdo (0,1), lo cual es muy bueno. Después se aplana un poco, lo cual indica que el clasificador mantiene buena sensibilidad sin perder demasiada especificidad.
 La línea diagonal gris representa un clasificador aleatorio (sin capacidad predictiva), como la curva está consistentemente por encima de esta diagonal, se concluye que el modelo es mejor que un clasificador al azar.
+
 El AUC obtenido fue de aproximadamente **0.98**, lo cual indica un excelente y eficaz desempeño del modelo.
 
 ---
 
 ## Conclusiones
 
-- La regresión logística es una herramienta útil y eficaz para la clasificación de mensajes de texto como spam.
-- A pesar de ser un modelo lineal, logra una alta precisión gracias a la representación adecuada del texto.
-- Futuras mejoras podrían incluir:
-  - Modelos no lineales (Random Forest, SVM)
-  - Incorporación de embeddings semánticos como Word2Vec o BERT
-- El modelo logra una separación clara entre spam y ham con base en el contenido textual.
-- La longitud del mensaje parece ser una característica parcialmente informativa: los mensajes spam tienden a ser más largos.
-- La limpieza del texto y reducción de dimensionalidad mejoraron la eficiencia del modelo.
+El modelo de regresión logística, apoyado en una adecuada limpieza y transformación del texto, logró una clasificación precisa entre mensajes spam y no spam. El análisis descriptivo mostró diferencias claras en la longitud promedio de los mensajes entre ambas clases. El proceso de tokenización y reducción de la matriz de términos permitió construir un conjunto de variables predictoras eficiente, lo que se reflejó en métricas de desempeño destacadas como una alta exactitud y un AUC cercano a 0.98. En conjunto, los resultados validan tanto el enfoque estadístico como las decisiones de preprocesamiento empleadas en el desarrollo del clasificador.
 
 ---
