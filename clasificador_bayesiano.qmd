@@ -7,23 +7,143 @@ format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| message: false
+#| warning: false
+library(tidyverse)
+library(tm)
+library(SnowballC)
+library(caTools)
+library(caret)
+library(pROC)
 ```
 
-You can add options to executable code like this
+# Análisis descriptivo
+
+```{r}
+#| include: false
+# Cargar datos
+df <- read.csv("spam.csv", fileEncoding = "latin1", stringsAsFactors = FALSE)
+
+df <- df %>%
+  select(v1, v2) %>%
+  rename(label = v1, message = v2)
+
+df$label <- as.factor(df$label)
+```
+
+```{r}
+# Histograma
+ggplot(df, aes(x = label, fill = label)) +
+  geom_bar() +
+  labs(
+    title = "Distribución de Spam vs Ham",
+    x = "Categoría",
+    y = "Cantidad"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("ham" = "blue", "spam" = "red"))
+
+# Distribución porcentual
+knitr::kable(df %>%
+  count(label) %>%
+  mutate(percentage = n / sum(n) * 100))
+```
+
+```{r}
+# Longitud del mensaje
+df <- df %>%
+  mutate(message_length = nchar(message))
+
+# Distribución de la longitud del mensaje
+ggplot(df, aes(x = message_length, fill = label)) +
+  geom_histogram(bins = 50, position = "identity", alpha = 0.7) +
+  labs(
+    title = "Distribución de la Longitud del Mensaje",
+    x = "Longitud",
+    y = "Frecuencia"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("ham" = "skyblue", "spam" = "salmon"))
+```
+
+# Modelo regresión logística
+
+```{r}
+#| message: false
+#| warning: false
+# Corpus columna mensajes
+corpus <- Corpus(VectorSource(df$message))
+
+# Limpieza
+corpus_clean <- corpus %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, stopwords("english")) %>%
+  tm_map(stemDocument) %>%
+  tm_map(stripWhitespace)
+
+# Document-Term Matrix (DTM)
+dtm <- DocumentTermMatrix(corpus_clean)
+
+# Reducir la dimensionalidad
+sparse_dtm <- removeSparseTerms(dtm, 0.999)
+
+knitr::kable(dim(sparse_dtm))
+print(dim(sparse_dtm))
+
+X <- as.data.frame(as.matrix(sparse_dtm))
+X$label <- df$label
+```
+
+```{r}
+set.seed(123)
+
+split <- sample.split(X$label, SplitRatio = 0.80)
+train_set <- subset(X, split == TRUE)
+test_set <- subset(X, split == FALSE)
+```
 
 ```{r}
 #| echo: false
-2 * 2
+#| message: false
+#| warning: false
+# Entrenar el modelo logistico
+log_reg_model <- glm(label ~ ., data = train_set, family = "binomial")
+
+summary(log_reg_model)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+#| message: false
+#| warning: false
+# Predicciones
+predicted_probs <- predict(log_reg_model, newdata = test_set, type = "response")
+
+# Convertir a clases - umbral de 0.5
+predicted_labels <- ifelse(predicted_probs > 0.5, "spam", "ham")
+predicted_labels <- as.factor(predicted_labels)
+
+# Matriz de confusión
+confusionMatrix(data = predicted_labels, reference = test_set$label, positive = "spam")
+```
+
+```{r}
+#| message: false
+#| warning: false
+roc_obj <- roc(test_set$label, predicted_probs)
+
+# AUC
+auc_value <- auc(roc_obj); auc_value
+
+# Curva ROC
+ggroc(roc_obj, colour = 'orange', size = 1) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed") +
+  labs(
+    title = paste("Curva ROC"),
+    x = "Especificidad",
+    y = "Sensibilidad"
+  ) +
+  theme_minimal()
+```
