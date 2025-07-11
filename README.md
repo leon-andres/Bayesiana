@@ -27,6 +27,7 @@ Se agregó una variable `message_length` que representa la cantidad de caractere
 
 ![Longitud de los mensajes](figure-html/unnamed-chunk-4-1.png)
 
+Es fácil evidenciar que uno de los factores clave al clasificar un mensaje, es su longitud. Mientras que los mensajes ham tienen un sesgo a la derecha, es decir, en su mayoría toman valores bajos. Los mensajes clasificados como spam alteran bastante la distribución con un claro sesgo negativo, es decir, toman valores muy altos para la longitud.
 ---
 
 ## Modelo de Regresión Logística
