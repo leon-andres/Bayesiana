@@ -70,7 +70,7 @@ Se evaluó el desempeño del modelo en términos de:
 
 ### AUC y Curva ROC
 
-![Curva ROC](figures/roc_curve.png)
+![Curva ROC](figure-html/unnamed-chunk-9-1.png)
 
 El AUC obtenido fue de aproximadamente **0.98**, lo cual indica un excelente desempeño del modelo.
 
