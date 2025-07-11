@@ -8,9 +8,11 @@ Autores: **Tomás Ávila** y **Andrés León**
 
 El conjunto de datos consiste en mensajes que fueron o no etiquetados como spam. Se aplicaron análisis exploratorios para observar la distribución de las clases y características como la longitud de los mensajes.
 
-### Histograma
+### Frecuencias
 
 ![Distribución Spam vs Ham](figure-html/unnamed-chunk-3-1.png)
+
+Vemos que el número de mensajes reportados como spam es bajo comparado con el número de mensajes que no fueron reportados. Esto se puede deber a la naturalidad de los mensajes o a una baja calidad del clasificador, lo cual verificaremos más adelante.
 
 La siguiente tabla muestra el porcentaje de cada clase:
 
