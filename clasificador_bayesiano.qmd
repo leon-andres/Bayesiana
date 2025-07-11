@@ -1,8 +1,8 @@
 ---
 title: "Clasificador Bayesiano de Filtro de Spam"
 author: 
-  - Andres Leon
-  - Tomas
+  - Tomás Ávila
+  - Andrés León
 format: html
 editor: visual
 ---
