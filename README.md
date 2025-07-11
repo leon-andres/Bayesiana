@@ -16,14 +16,14 @@ La siguiente tabla muestra el porcentaje de cada clase:
 
 | label | count | percentage |
 |-------|-------|------------|
-| ham   | ...   | ... %      |
-| spam  | ...   | ... %      |
+| ham   | -   | -%      |
+| spam  | -   | -%      |
 
 ### Longitud de los Mensajes
 
 Se agregó una variable `message_length` que representa la cantidad de caracteres en cada mensaje.
 
-![Longitud de los mensajes](figures/longitud_mensajes.png)
+![Longitud de los mensajes](figure-html/unnamed-chunk-4-1.png)
 
 ---
 
