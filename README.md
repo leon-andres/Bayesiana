@@ -32,7 +32,7 @@ Es fácil evidenciar que uno de los factores clave al clasificar un mensaje, es 
 
 ## Modelo de Regresión Logística
 
-### Preprocesamiento
+### Tokenización
 
 Se realizó una limpieza de los mensajes, con el fin de obtener valores más sencillos de manejar y con el fin de reducir la dimensionalidad. Se aplicaron los siguientes procesos:
 
@@ -75,15 +75,9 @@ Se evaluó el desempeño del modelo en términos de:
 
 ![Curva ROC](figure-html/unnamed-chunk-9-1.png)
 
-El AUC obtenido fue de aproximadamente **0.98**, lo cual indica un excelente desempeño del modelo.
-
----
-
-## Análisis de Resultados
-
-- El modelo logra una separación clara entre spam y ham con base en el contenido textual.
-- La longitud del mensaje parece ser una característica parcialmente informativa: los mensajes spam tienden a ser más largos.
-- La limpieza del texto y reducción de dimensionalidad mejoraron la eficiencia del modelo.
+La curva comienza en el punto (0,0) y crece rápidamente hacia el vértice superior izquierdo (0,1), lo cual es muy bueno. Después se aplana un poco, lo cual indica que el clasificador mantiene buena sensibilidad sin perder demasiada especificidad.
+La línea diagonal gris representa un clasificador aleatorio (sin capacidad predictiva), como la curva está consistentemente por encima de esta diagonal, se concluye que el modelo es mejor que un clasificador al azar.
+El AUC obtenido fue de aproximadamente **0.98**, lo cual indica un excelente y eficaz desempeño del modelo.
 
 ---
 
@@ -94,5 +88,8 @@ El AUC obtenido fue de aproximadamente **0.98**, lo cual indica un excelente des
 - Futuras mejoras podrían incluir:
   - Modelos no lineales (Random Forest, SVM)
   - Incorporación de embeddings semánticos como Word2Vec o BERT
+- El modelo logra una separación clara entre spam y ham con base en el contenido textual.
+- La longitud del mensaje parece ser una característica parcialmente informativa: los mensajes spam tienden a ser más largos.
+- La limpieza del texto y reducción de dimensionalidad mejoraron la eficiencia del modelo.
 
 ---
