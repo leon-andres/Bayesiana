@@ -10,7 +10,7 @@ El conjunto de datos consiste en mensajes que fueron o no etiquetados como spam.
 
 ### Histograma
 
-![Distribución Spam vs Ham](figures/distribucion_spam_ham.png)
+![Distribución Spam vs Ham](figure-html/unnamed-chunk-3-1.png)
 
 La siguiente tabla muestra el porcentaje de cada clase:
 
