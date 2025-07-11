@@ -34,7 +34,7 @@ Es fácil evidenciar que uno de los factores clave al clasificar un mensaje, es 
 
 ### Preprocesamiento
 
-Se limpió el texto con los siguientes pasos:
+Se realizó una limpieza de los mensajes, con el fin de obtener valores más sencillos de manejar y con el fin de reducir la dimensionalidad. Se aplicaron los siguientes procesos:
 
 - Conversión a minúsculas
 - Eliminación de puntuación y números
