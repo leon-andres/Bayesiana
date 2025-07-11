@@ -18,8 +18,8 @@ La siguiente tabla muestra el porcentaje de cada clase:
 
 | label | count | percentage |
 |-------|-------|------------|
-| ham   | -   | -%      |
-| spam  | -   | -%      |
+| ham   | 4825   | 86.59368%      |
+| spam  | 747   | 13.40632%      |
 
 ### Longitud de los Mensajes
 
