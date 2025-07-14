@@ -12,6 +12,7 @@ editor: visual
 #| warning: false
 library(tidyverse)
 library(tm)
+library(e1071)
 library(SnowballC)
 library(caTools)
 library(caret)
@@ -90,8 +91,7 @@ dtm <- DocumentTermMatrix(corpus_clean)
 # Reducir la dimensionalidad
 sparse_dtm <- removeSparseTerms(dtm, 0.999)
 
-knitr::kable(dim(sparse_dtm))
-print(dim(sparse_dtm))
+dim(sparse_dtm)
 
 X <- as.data.frame(as.matrix(sparse_dtm))
 X$label <- df$label
@@ -110,7 +110,8 @@ test_set <- subset(X, split == FALSE)
 #| message: false
 #| warning: false
 # Entrenar el modelo logistico
-log_reg_model <- glm(label ~ ., data = train_set, family = "binomial")
+log_reg_model <- glm(label ~ ., 
+                     data = train_set, family = "binomial")
 
 summary(log_reg_model)
 ```
@@ -119,7 +120,8 @@ summary(log_reg_model)
 #| message: false
 #| warning: false
 # Predicciones
-predicted_probs <- predict(log_reg_model, newdata = test_set, type = "response")
+predicted_probs <- predict(log_reg_model, 
+                           newdata = test_set, type = "response")
 
 # Convertir a clases - umbral de 0.5
 predicted_labels <- ifelse(predicted_probs > 0.5, "spam", "ham")
@@ -141,9 +143,158 @@ auc_value <- auc(roc_obj); auc_value
 ggroc(roc_obj, colour = 'orange', size = 1) +
   geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed") +
   labs(
-    title = paste("Curva ROC"),
+    title = "Curva ROC",
     x = "Especificidad",
     y = "Sensibilidad"
   ) +
   theme_minimal()
+```
+
+# Modelo Naive-Bayes
+
+```{r}
+#| message: false
+#| warning: false
+# Entrenar modelo
+X_train <- train_set[, -ncol(train_set)]
+y_train <- train_set$label
+
+nb_model <- naiveBayes(x = X_train, y = y_train, laplace = TRUE)
+```
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+X_test <- test_set[, -ncol(test_set)]
+y_test <- test_set$label
+
+# Predicción
+nb_predicted_labels <- predict(nb_model, newdata = X_test)
+
+# Matriz de confusión y métricas
+confusionMatrix(data = nb_predicted_labels, reference = y_test, positive = "spam")
+```
+
+```{r}
+#| message: false
+#| warning: false
+# Curva ROC
+nb_predicted_probs <- predict(nb_model, newdata = X_test, type = "raw")
+
+nb_roc_obj <- roc(y_test, nb_predicted_probs[, "spam"])
+
+# AUC
+nb_auc_value <- auc(nb_roc_obj)
+print(paste("AUC del modelo Naive-Bayes:", round(nb_auc_value, 4)))
+
+# Curva ROC
+ggroc(nb_roc_obj, colour = 'blue', size = 1) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), color="grey", linetype="dashed") +
+  labs(
+    title = "Curva ROC - Naive Bayes",
+    x = "1 - Especificidad",
+    y = "Sensibilidad"
+  ) +
+  theme_minimal()
+```
+
+# Naive-Bayes con otra prior
+
+Se usara una prior de 50%/50%
+
+```{r}
+#| message: false
+#| warning: false
+# Entrenar modelo
+nb_model_prior <- naiveBayes(x = X_train, y = y_train,
+                           prior = c(ham = 0.5, spam = 0.5))
+
+# Evaluar modelo
+nb_predicted_labels_prior <- predict(nb_model_prior, newdata = X_test)
+confusionMatrix(data = nb_predicted_labels_prior, reference = y_test, positive = "spam")
+```
+
+# Bernoulli Naive-Bayes
+
+Esta variante no considera la frecuencia de las palabras, sino únicamente su presencia o ausencia.
+
+```{r}
+#| message: false
+#| warning: false
+X_bernoulli <- X %>%
+  mutate(across(-label, ~as.factor(ifelse(. > 0, 1, 0))))
+
+train_set_bernoulli <- subset(X_bernoulli, split == TRUE)
+test_set_bernoulli <- subset(X_bernoulli, split == FALSE)
+```
+
+```{r}
+# Entrenar modelo
+X_train_bernoulli <- train_set_bernoulli[, -ncol(train_set_bernoulli)]
+y_train_bernoulli <- train_set_bernoulli$label
+
+nb_model_bernoulli <- naiveBayes(x = X_train_bernoulli, y = y_train_bernoulli)
+
+# Evaluar modelo
+X_test_bernoulli <- test_set_bernoulli[, -ncol(test_set_bernoulli)]
+y_test_bernoulli <- test_set_bernoulli$label
+nb_predicted_labels_bernoulli <- predict(nb_model_bernoulli, newdata = X_test_bernoulli)
+
+confusionMatrix(data = nb_predicted_labels_bernoulli, reference = y_test_bernoulli, positive = "spam")
+```
+
+# Tabla comparativa de resultados
+
+```{r}
+#| message: false
+#| warning: false
+# Valores AUC
+# modelo Naive Bayes con Prior
+nb_predicted_probs_prior <- predict(nb_model_prior, newdata = X_test, type = "raw")
+roc_obj_prior <- roc(y_test, nb_predicted_probs_prior[, "spam"])
+auc_value_prior <- auc(roc_obj_prior)
+
+# modelo Naive Bayes Bernoulli
+nb_predicted_probs_bernoulli <- predict(nb_model_bernoulli, newdata = X_test_bernoulli, type = "raw")
+roc_obj_bernoulli <- roc(y_test_bernoulli, nb_predicted_probs_bernoulli[, "spam"])
+auc_value_bernoulli <- auc(roc_obj_bernoulli)
+
+
+# Metricas Matriz de confución
+log_reg_metrics <- confusionMatrix(data = predicted_labels, reference = test_set$label, positive = "spam")
+nb_metrics <- confusionMatrix(data = nb_predicted_labels, reference = y_test, positive = "spam")
+nb_prior_metrics <- confusionMatrix(data = nb_predicted_labels_prior, reference = y_test, positive = "spam")
+nb_bernoulli_metrics <- confusionMatrix(data = nb_predicted_labels_bernoulli, reference = y_test_bernoulli, positive = "spam")
+
+comparison_df <- data.frame(
+  Modelo = c("Regresión Logística", "Naive Bayes Multinomial", "NB con Prior 50/50", "Naive Bayes Bernoulli"),
+  Accuracy = c(
+    log_reg_metrics$overall["Accuracy"],
+    nb_metrics$overall["Accuracy"],
+    nb_prior_metrics$overall["Accuracy"],
+    nb_bernoulli_metrics$overall["Accuracy"]
+  ),
+  Precision = c(
+    log_reg_metrics$byClass["Precision"],
+    nb_metrics$byClass["Precision"],
+    nb_prior_metrics$byClass["Precision"],
+    nb_bernoulli_metrics$byClass["Precision"]
+  ),
+  Sensibilidad = c(
+    log_reg_metrics$byClass["Sensitivity"],
+    nb_metrics$byClass["Sensitivity"],
+    nb_prior_metrics$byClass["Sensitivity"],
+    nb_bernoulli_metrics$byClass["Sensitivity"]
+  ),
+  AUC = c(
+    auc_value,
+    nb_auc_value,
+    auc_value_prior,
+    auc_value_bernoulli
+  )
+)
+
+knitr::kable(comparison_df,
+             digits = 4)
 ```
