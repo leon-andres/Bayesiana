@@ -244,6 +244,22 @@ nb_predicted_labels_bernoulli <- predict(nb_model_bernoulli, newdata = X_test_be
 confusionMatrix(data = nb_predicted_labels_bernoulli, reference = y_test_bernoulli, positive = "spam")
 ```
 
+```{r}
+nb_predicted_probs_bernoulli <- predict(nb_model_bernoulli, newdata = X_test_bernoulli, type = "raw")
+nb_roc_obj_bernoulli <- roc(y_test_bernoulli, nb_predicted_probs_bernoulli[, "spam"])
+nb_auc_bernoulli <- auc(nb_roc_obj_bernoulli)
+print(paste("AUC del modelo Bernoulli:", round(nb_auc_bernoulli, 4)))
+ggroc(nb_roc_obj_bernoulli, colour = 'darkgreen', size = 1) +
+  geom_segment(aes(x = 1, xend = 0, y = 0, yend = 1), 
+               color = "grey", linetype = "dashed") +
+  labs(
+    title = "Curva ROC - Naive Bayes Bernoulli",
+    x = "1 - Especificidad",
+    y = "Sensibilidad"
+  ) +
+  theme_minimal()
+```
+
 # Tabla comparativa de resultados
 
 ```{r}
